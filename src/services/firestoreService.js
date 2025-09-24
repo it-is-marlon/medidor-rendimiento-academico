@@ -13,11 +13,15 @@ import {
   deleteDoc,
   orderBy,
   limit,
+  startAfter,
+  writeBatch,
 } from "firebase/firestore";
 import { db, appId } from "./firebaseConfig";
 
 // Servicio de Firestore
 const firestoreService = {
+  // ===== FUNCIONES DE USUARIOS =====
+  
   // Obtiene el perfil de un usuario específico
   getUserProfile: async (userId) => {
     const docRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
@@ -28,11 +32,10 @@ const firestoreService = {
     return null;
   },
 
-  // Obtiene todos los usuarios y sus perfiles en tiempo real de forma robusta
+  // Obtiene todos los usuarios y sus perfiles en tiempo real
   getUsersListener: (callback) => {
     const usersCollectionRef = collection(db, `artifacts/${appId}/users`);
     return onSnapshot(usersCollectionRef, async (snapshot) => {
-      // Usamos Promise.all para obtener todos los perfiles en paralelo
       const profilePromises = snapshot.docs.map(async (userDoc) => {
         try {
           const profileSnap = await getDoc(doc(userDoc.ref, "profile/data"));
@@ -47,12 +50,10 @@ const firestoreService = {
             `Error al obtener el perfil para el usuario con ID ${userDoc.id}:`,
             error
           );
-          return null; // Devolvemos null para filtrar los perfiles que no se pudieron obtener
+          return null;
         }
       });
-      // Esperamos a que todas las promesas se resuelvan
       const profiles = await Promise.all(profilePromises);
-      // Filtramos los perfiles nulos
       const validProfiles = profiles.filter((profile) => profile !== null);
       callback(validProfiles);
     });
@@ -61,7 +62,10 @@ const firestoreService = {
   // Actualiza el perfil de un usuario
   updateUserProfile: async (userId, dataToUpdate) => {
     const userRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
-    await updateDoc(userRef, dataToUpdate);
+    await updateDoc(userRef, {
+      ...dataToUpdate,
+      updatedAt: new Date()
+    });
   },
 
   // Elimina el perfil de un usuario de Firestore
@@ -69,6 +73,8 @@ const firestoreService = {
     const userRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
     await deleteDoc(userRef);
   },
+
+  // ===== FUNCIONES DE CURSOS =====
 
   // Crea un nuevo curso para un docente
   createCourse: async (name, teacherId) => {
@@ -80,7 +86,7 @@ const firestoreService = {
       name: name,
       teacherId: teacherId,
       studentIds: [],
-      // CAMBIO: Asegura que el documento exista
+      createdAt: new Date(),
       reconocible: "si",
     });
   },
@@ -92,7 +98,10 @@ const firestoreService = {
       `artifacts/${appId}/public/data/courses`,
       courseId
     );
-    await updateDoc(courseRef, dataToUpdate);
+    await updateDoc(courseRef, {
+      ...dataToUpdate,
+      updatedAt: new Date()
+    });
   },
 
   // Obtiene todos los cursos en tiempo real
@@ -117,7 +126,68 @@ const firestoreService = {
     );
   },
 
-  // Obtiene todos los alumnos de la base de datos en tiempo real
+  // Obtiene los cursos de un docente específico
+  getTeacherCourses: (teacherId, callback) => {
+    const q = query(
+      collection(db, `artifacts/${appId}/public/data/courses`),
+      where("teacherId", "==", teacherId)
+    );
+    return onSnapshot(q, (snapshot) => {
+      const courses = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(courses);
+    });
+  },
+
+  // ===== FUNCIONES DE ESTUDIANTES =====
+
+  // Crea un nuevo estudiante
+  createStudent: async (studentData) => {
+    const studentsCollectionRef = collection(
+      db,
+      `artifacts/${appId}/public/data/students`
+    );
+    return await addDoc(studentsCollectionRef, {
+      name: studentData.name,
+      parentEmail: studentData.parentEmail,
+      photoUrl: studentData.photoUrl || 'https://via.placeholder.com/150?text=Estudiante',
+      courseIds: studentData.courseIds || [],
+      createdAt: new Date(),
+      reconocible: "si",
+      ...studentData
+    });
+  },
+
+  // Crea múltiples estudiantes por lotes
+  createBulkStudents: async (studentsData) => {
+    const batch = writeBatch(db);
+    const studentsCollectionRef = collection(
+      db,
+      `artifacts/${appId}/public/data/students`
+    );
+
+    const results = [];
+    for (const studentData of studentsData) {
+      const studentRef = doc(studentsCollectionRef);
+      batch.set(studentRef, {
+        name: studentData.name,
+        parentEmail: studentData.parentEmail,
+        photoUrl: studentData.photoUrl || 'https://via.placeholder.com/150?text=Estudiante',
+        courseIds: studentData.courseIds || [],
+        createdAt: new Date(),
+        reconocible: "si",
+        ...studentData
+      });
+      results.push({ id: studentRef.id, ...studentData });
+    }
+
+    await batch.commit();
+    return results;
+  },
+
+  // Obtiene todos los estudiantes en tiempo real
   getStudentsListener: (callback) => {
     const studentsCollectionRef = collection(
       db,
@@ -130,6 +200,32 @@ const firestoreService = {
       }));
       callback(studentsList);
     });
+  },
+
+  // Obtiene estudiantes paginados
+  getStudentsPaginated: async (limitCount = 20, lastDoc = null) => {
+    let q = query(
+      collection(db, `artifacts/${appId}/public/data/students`),
+      orderBy("name"),
+      limit(limitCount)
+    );
+
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
+    }
+
+    const snapshot = await getDocs(q);
+    const students = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      _doc: doc // Para paginación
+    }));
+
+    return {
+      students,
+      lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
+      hasMore: snapshot.docs.length === limitCount
+    };
   },
 
   // Obtiene estudiantes por el email del apoderado
@@ -162,35 +258,47 @@ const firestoreService = {
     });
   },
 
-  // Actualiza los datos de un alumno
+  // Busca estudiantes por nombre
+  searchStudentsByName: async (searchTerm) => {
+    const studentsRef = collection(db, `artifacts/${appId}/public/data/students`);
+    const snapshot = await getDocs(studentsRef);
+    
+    const students = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    return students.filter(student => 
+      student.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  },
+
+  // Actualiza los datos de un estudiante
   updateStudentProfile: async (studentId, dataToUpdate) => {
     const studentRef = doc(
       db,
       `artifacts/${appId}/public/data/students`,
       studentId
     );
-    await updateDoc(studentRef, dataToUpdate);
+    await updateDoc(studentRef, {
+      ...dataToUpdate,
+      updatedAt: new Date()
+    });
   },
 
-  // Elimina el perfil de un alumno de la base de datos de Firestore
+  // Elimina el perfil de un estudiante
   deleteStudentProfile: async (studentId) => {
     await deleteDoc(
       doc(db, `artifacts/${appId}/public/data/students`, studentId)
     );
   },
 
-  // Obtiene los cursos de un docente específico
-  getTeacherCourses: (teacherId, callback) => {
-    const q = query(
-      collection(db, `artifacts/${appId}/public/data/courses`),
-      where("teacherId", "==", teacherId)
-    );
-    return onSnapshot(q, (snapshot) => {
-      const courses = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      callback(courses);
+  // Asigna un estudiante a un curso
+  assignStudentToCourse: async (studentId, courseId) => {
+    const studentRef = doc(db, `artifacts/${appId}/public/data/students`, studentId);
+    await updateDoc(studentRef, {
+      courseIds: arrayUnion(courseId),
+      updatedAt: new Date()
     });
   },
 
@@ -218,7 +326,6 @@ const firestoreService = {
       note: note,
       timestamp: new Date(),
       createdAt: new Date(),
-      // CAMBIO: Asegura que el documento exista
       reconocible: "si",
     };
 
@@ -239,6 +346,71 @@ const firestoreService = {
       }));
       callback(records);
     });
+  },
+
+  // Obtiene registros con filtros avanzados
+  getRecordsWithFilters: async (filters) => {
+    let q = collection(db, `artifacts/${appId}/public/data/records`);
+
+    // Aplicar filtros
+    const constraints = [];
+
+    if (filters.courseId) {
+      constraints.push(where("courseId", "==", filters.courseId));
+    }
+    if (filters.studentId) {
+      constraints.push(where("studentId", "==", filters.studentId));
+    }
+    if (filters.teacherId) {
+      constraints.push(where("teacherId", "==", filters.teacherId));
+    }
+    if (filters.type && filters.type !== 'all') {
+      constraints.push(where("type", "==", filters.type));
+    }
+
+    // Ordenar por timestamp
+    constraints.push(orderBy("timestamp", "desc"));
+
+    // Limitar resultados
+    if (filters.limit) {
+      constraints.push(limit(filters.limit));
+    }
+
+    q = query(q, ...constraints);
+
+    const snapshot = await getDocs(q);
+    let records = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Filtros adicionales que no se pueden hacer en Firestore
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      records = records.filter(record => {
+        const recordDate = record.timestamp?.toDate?.() || new Date(record.timestamp);
+        return recordDate >= fromDate;
+      });
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      records = records.filter(record => {
+        const recordDate = record.timestamp?.toDate?.() || new Date(record.timestamp);
+        return recordDate <= toDate;
+      });
+    }
+
+    if (filters.minValue) {
+      records = records.filter(record => record.value >= parseInt(filters.minValue));
+    }
+
+    if (filters.maxValue) {
+      records = records.filter(record => record.value <= parseInt(filters.maxValue));
+    }
+
+    return records;
   },
 
   // Obtiene registros por estudiante
@@ -281,7 +453,10 @@ const firestoreService = {
       `artifacts/${appId}/public/data/records`,
       recordId
     );
-    await updateDoc(recordRef, dataToUpdate);
+    await updateDoc(recordRef, {
+      ...dataToUpdate,
+      updatedAt: new Date()
+    });
   },
 
   // Elimina un registro específico
@@ -300,12 +475,15 @@ const firestoreService = {
     value,
     note = ""
   ) => {
+    const batch = writeBatch(db);
     const recordsCollectionRef = collection(
       db,
       `artifacts/${appId}/public/data/records`
     );
 
-    const promises = studentIds.map((studentId) => {
+    const results = [];
+    for (const studentId of studentIds) {
+      const recordRef = doc(recordsCollectionRef);
       const newRecord = {
         studentId: studentId,
         courseId: courseId,
@@ -315,14 +493,18 @@ const firestoreService = {
         note: note,
         timestamp: new Date(),
         createdAt: new Date(),
-        // CAMBIO: Asegura que el documento exista
         reconocible: "si",
       };
-      return addDoc(recordsCollectionRef, newRecord);
-    });
+      
+      batch.set(recordRef, newRecord);
+      results.push({ id: recordRef.id, ...newRecord });
+    }
 
-    return await Promise.all(promises);
+    await batch.commit();
+    return results;
   },
+
+  // ===== FUNCIONES DE ESTADÍSTICAS =====
 
   // Obtiene estadísticas del curso (promedios por categoría)
   getCourseStats: async (courseId) => {
@@ -393,6 +575,95 @@ const firestoreService = {
     return stats;
   },
 
+  // Obtiene estadísticas globales de la institución
+  getGlobalStats: async () => {
+    try {
+      const [studentsSnapshot, coursesSnapshot, recordsSnapshot] = await Promise.all([
+        getDocs(collection(db, `artifacts/${appId}/public/data/students`)),
+        getDocs(collection(db, `artifacts/${appId}/public/data/courses`)),
+        getDocs(query(
+          collection(db, `artifacts/${appId}/public/data/records`),
+          orderBy("timestamp", "desc"),
+          limit(1000) // Últimos 1000 registros para estadísticas
+        ))
+      ]);
+
+      const totalStudents = studentsSnapshot.size;
+      const totalCourses = coursesSnapshot.size;
+      const totalRecords = recordsSnapshot.size;
+
+      const records = recordsSnapshot.docs.map(doc => doc.data());
+
+      // Calcular promedios globales
+      const globalStats = {
+        participacion: { total: 0, count: 0, average: 0 },
+        comportamiento: { total: 0, count: 0, average: 0 },
+        puntualidad: { total: 0, count: 0, average: 0 },
+      };
+
+      records.forEach(record => {
+        if (globalStats[record.type]) {
+          globalStats[record.type].total += record.value;
+          globalStats[record.type].count += 1;
+        }
+      });
+
+      Object.keys(globalStats).forEach(type => {
+        if (globalStats[type].count > 0) {
+          globalStats[type].average = globalStats[type].total / globalStats[type].count;
+        }
+      });
+
+      // Estudiantes por rendimiento
+      const studentPerformance = {
+        excelente: 0, // promedio >= 4.5
+        destacado: 0, // promedio >= 3.5
+        satisfactorio: 0, // promedio >= 2.5
+        necesitaApoyo: 0 // promedio < 2.5
+      };
+
+      // Calcular rendimiento por estudiante
+      const studentsData = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      for (const student of studentsData) {
+        const studentRecordsQuery = query(
+          collection(db, `artifacts/${appId}/public/data/records`),
+          where("studentId", "==", student.id)
+        );
+        
+        try {
+          const studentRecordsSnapshot = await getDocs(studentRecordsQuery);
+          const studentRecords = studentRecordsSnapshot.docs.map(doc => doc.data());
+          
+          if (studentRecords.length > 0) {
+            const totalValue = studentRecords.reduce((sum, record) => sum + record.value, 0);
+            const average = totalValue / studentRecords.length;
+            
+            if (average >= 4.5) studentPerformance.excelente++;
+            else if (average >= 3.5) studentPerformance.destacado++;
+            else if (average >= 2.5) studentPerformance.satisfactorio++;
+            else studentPerformance.necesitaApoyo++;
+          }
+        } catch (error) {
+          console.error(`Error calculando rendimiento para estudiante ${student.id}:`, error);
+        }
+      }
+
+      return {
+        totals: {
+          students: totalStudents,
+          courses: totalCourses,
+          records: totalRecords
+        },
+        averages: globalStats,
+        studentPerformance
+      };
+    } catch (error) {
+      console.error("Error obteniendo estadísticas globales:", error);
+      throw error;
+    }
+  },
+
   // ===== FUNCIONES ESPECÍFICAS PARA APODERADOS =====
 
   // Obtiene estudiantes asociados a un apoderado con más detalles
@@ -412,7 +683,6 @@ const firestoreService = {
       const studentsWithDetails = await Promise.all(
         students.map(async (student) => {
           try {
-            // Obtener estadísticas generales del estudiante
             const allRecordsQuery = query(
               collection(db, `artifacts/${appId}/public/data/records`),
               where("studentId", "==", student.id)
@@ -421,7 +691,6 @@ const firestoreService = {
             const recordsSnapshot = await getDocs(allRecordsQuery);
             const totalRecords = recordsSnapshot.size;
 
-            // Calcular promedio general
             let totalValue = 0;
             let recordCount = 0;
 
@@ -527,7 +796,6 @@ const firestoreService = {
 
   // Obtiene registros recientes de todos los hijos de un apoderado
   getRecentRecordsForParent: (parentEmail, limitRecords = 20, callback) => {
-    // Primero obtener los estudiantes del apoderado
     const studentsQuery = query(
       collection(db, `artifacts/${appId}/public/data/students`),
       where("parentEmail", "==", parentEmail)
@@ -541,7 +809,6 @@ const firestoreService = {
         return;
       }
 
-      // Obtener registros recientes de todos los estudiantes
       try {
         const recordsPromises = studentIds.map(async (studentId) => {
           const recordsQuery = query(
@@ -579,13 +846,11 @@ const firestoreService = {
   // Obtiene estadísticas comparativas de un estudiante vs su curso
   getComparativeStats: async (studentId, courseId) => {
     try {
-      // Estadísticas del estudiante - usar this en lugar de firestoreService
       const studentStats = await firestoreService.getStudentStats(
         studentId,
         courseId
       );
 
-      // Estadísticas del curso - usar this en lugar de firestoreService
       const courseStats = await firestoreService.getCourseStats(courseId);
 
       // Calcular comparaciones
