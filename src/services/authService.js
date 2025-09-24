@@ -2,6 +2,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db, appId } from "./firebaseConfig";
@@ -19,13 +22,16 @@ const authService = {
       );
       const user = userCredential.user;
 
-      // Paso 1: CREAR EL CAMPO EN EL DOCUMENTO PRINCIPAL DEL USUARIO (tu "profile" principal)
-      // La referencia apunta a: artifacts/{appId}/users/{user.uid}
-      const mainUserRef = doc(db, `artifacts/${appId}/users/${user.uid}`);
+      // 2. Actualizar el perfil del usuario con el nombre
+      await updateProfile(user, {
+        displayName: name,
+      });
 
-      // CAMBIO: Se agrega el campo 'reconocible' al documento principal.
-      // Usamos { merge: true } para asegurarnos de no sobrescribir otros campos
-      // si el documento ya existiera por alguna razón.
+      // 3. Enviar correo de verificación
+      await sendEmailVerification(user);
+
+      // 4. Crear el documento principal del usuario
+      const mainUserRef = doc(db, `artifacts/${appId}/users/${user.uid}`);
       await setDoc(
         mainUserRef,
         {
@@ -34,8 +40,7 @@ const authService = {
         { merge: true }
       );
 
-      // Paso 2: CREAR EL DOCUMENTO DE DATOS DETALLADO (tu "data")
-      // La referencia apunta a: artifacts/{appId}/users/{user.uid}/profile/data
+      // 5. Crear el documento de datos detallado
       const profileDataRef = doc(
         db,
         `artifacts/${appId}/users/${user.uid}/profile/data`
@@ -45,7 +50,9 @@ const authService = {
         email: email,
         role: role,
         userId: user.uid,
-        reconocible: "si", // Mantenemos el campo aquí por consistencia
+        reconocible: "si",
+        emailVerified: false,
+        createdAt: new Date(),
       });
 
       console.log("Usuario creado y perfil guardado en Firestore.");
@@ -79,6 +86,55 @@ const authService = {
       console.log("Sesión cerrada correctamente.");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+    }
+  },
+
+  // Envía un correo de restablecimiento de contraseña
+  resetPassword: async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      console.log("Correo de restablecimiento enviado.");
+      return true;
+    } catch (error) {
+      console.error("Error al enviar correo de restablecimiento:", error);
+      throw error;
+    }
+  },
+
+  // Reenvía el correo de verificación
+  resendEmailVerification: async () => {
+    try {
+      const user = auth.currentUser;
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user);
+        console.log("Correo de verificación reenviado.");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error al reenviar correo de verificación:", error);
+      throw error;
+    }
+  },
+
+  // Verifica si el usuario tiene el email verificado
+  checkEmailVerification: () => {
+    const user = auth.currentUser;
+    return user ? user.emailVerified : false;
+  },
+
+  // Recarga los datos del usuario actual
+  reloadUser: async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await user.reload();
+        return user;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error al recargar datos del usuario:", error);
+      throw error;
     }
   },
 };
