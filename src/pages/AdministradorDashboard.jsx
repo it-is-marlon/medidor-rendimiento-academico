@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
+import { CreateStudentModal } from '../components/admin/CreateStudentModal';
+import { ImportStudents } from '../components/admin/ImportStudents';
 
 export function AdministradorDashboard({ user, userProfile }) {
   const [activeTab, setActiveTab] = useState('usuarios');
@@ -29,6 +31,8 @@ export function AdministradorDashboard({ user, userProfile }) {
   const [editingStudent, setEditingStudent] = useState(null);
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentParentEmail, setNewStudentParentEmail] = useState('');
+  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
+  const [isImportingStudents, setIsImportingStudents] = useState(false);
 
   // Escucha los cambios en los datos en tiempo real
   useEffect(() => {
@@ -161,6 +165,24 @@ export function AdministradorDashboard({ user, userProfile }) {
   };
 
   // --- Lógica para la Gestión de Alumnos ---
+  const handleCreateStudent = () => {
+    setIsCreatingStudent(true);
+  };
+
+  const handleStudentCreated = () => {
+    console.log("Estudiante creado exitosamente");
+    setIsCreatingStudent(false);
+  };
+
+  const handleImportStudents = () => {
+    setIsImportingStudents(true);
+  };
+
+  const handleStudentsImported = (results) => {
+    console.log("Estudiantes importados:", results);
+    setIsImportingStudents(false);
+  };
+
   const handleEditStudent = (student) => {
     setIsEditingStudent(true);
     setEditingStudent(student);
@@ -475,7 +497,7 @@ export function AdministradorDashboard({ user, userProfile }) {
           {activeTab === 'alumnos' && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                {isEditingStudent ? 'Editar Alumno' : 'Lista de Alumnos'}
+                {isEditingStudent ? 'Editar Alumno' : 'Gestión de Alumnos'}
               </h2>
               {isEditingStudent ? (
                 <form onSubmit={handleUpdateStudent} className="mb-6 space-y-4">
@@ -510,50 +532,96 @@ export function AdministradorDashboard({ user, userProfile }) {
                   </div>
                 </form>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email del Apoderado</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID de Alumno</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {students.map((student) => (
-                        <tr key={student.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <img className="h-10 w-10 rounded-full" src={student.photoUrl} alt="" />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">{student.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{student.parentEmail}</td>
-                          <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">{student.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleEditStudent(student)}
-                              className="text-indigo-600 hover:text-indigo-900 mr-4"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              onClick={() => handleDeleteStudent(student.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Eliminar
-                            </button>
-                          </td>
+                <>
+                  {/* Botones de acción */}
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <button
+                      onClick={handleCreateStudent}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300 flex items-center"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Registrar Estudiante
+                    </button>
+                    <button
+                      onClick={handleImportStudents}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      Importar desde Archivo
+                    </button>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email del Apoderado</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cursos</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID de Alumno</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {students.map((student) => (
+                          <tr key={student.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <img className="h-10 w-10 rounded-full object-cover" src={student.photoUrl} alt={student.name} />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">{student.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{student.parentEmail}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {student.courseIds?.length || 0} curso(s)
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">{student.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleEditStudent(student)}
+                                className="text-indigo-600 hover:text-indigo-900 mr-4"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleDeleteStudent(student.id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           )}
         </>
       )}
+
+      {/* Modal para crear estudiante */}
+      <CreateStudentModal
+        isOpen={isCreatingStudent}
+        onClose={() => setIsCreatingStudent(false)}
+        onSuccess={handleStudentCreated}
+        courses={courses}
+      />
+
+      {/* Modal para importar estudiantes */}
+      <ImportStudents
+        isOpen={isImportingStudents}
+        onClose={() => setIsImportingStudents(false)}
+        onSuccess={handleStudentsImported}
+        courses={courses}
+      />
     </div>
   );
 }
