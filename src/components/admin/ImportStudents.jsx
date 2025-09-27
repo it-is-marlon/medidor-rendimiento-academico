@@ -190,82 +190,71 @@ Carlos López,padre3@email.com,,Historia 6A`;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-90vh overflow-y-auto">
+    <div>
+      <div>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div>
+          <h3>
             Importar Estudiantes desde Archivo
           </h3>
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            Cerrar
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div>
           {/* Paso 1: Subida de archivo */}
           {step === 1 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <h4 className="mt-2 text-lg font-medium text-gray-900">Subir archivo de estudiantes</h4>
-                <p className="mt-1 text-sm text-gray-500">
+            <div>
+              <div>
+                <h4>Subir archivo de estudiantes</h4>
+                <p>
                   Sube un archivo CSV o Excel con la información de los estudiantes
                 </p>
               </div>
 
               {/* Área de subida de archivos */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <div>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept=".csv,.xlsx,.xls"
                   onChange={handleFileSelect}
                   disabled={isLoading}
-                  className="hidden"
                 />
-                <div className="text-center">
+                <div>
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isLoading}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                   >
                     {isLoading ? 'Procesando...' : 'Seleccionar Archivo'}
                   </button>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p>
                     Formatos admitidos: CSV, Excel (.xlsx, .xls)
                   </p>
                 </div>
               </div>
 
               {/* Descargar plantilla */}
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
+              <div>
+                <div>
+                  <div>
+                    {/* icono eliminado */}
                   </div>
-                  <div className="ml-3">
-                    <h4 className="text-sm font-medium text-blue-800">
+                  <div>
+                    <h4>
                       ¿No tienes un archivo preparado?
                     </h4>
-                    <p className="mt-1 text-sm text-blue-700">
+                    <p>
                       Descarga nuestra plantilla de ejemplo para ver el formato correcto.
                     </p>
-                    <div className="mt-2">
+                    <div>
                       <button
                         onClick={downloadTemplate}
-                        className="text-sm text-blue-600 hover:text-blue-500 underline"
                       >
                         Descargar plantilla CSV
                       </button>
@@ -275,11 +264,11 @@ Carlos López,padre3@email.com,,Historia 6A`;
               </div>
 
               {/* Formato requerido */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">
+              <div>
+                <h4>
                   Formato requerido:
                 </h4>
-                <ul className="text-sm text-gray-600 space-y-1">
+                <ul>
                   <li><strong>nombre</strong> - Nombre completo del estudiante (requerido)</li>
                   <li><strong>email_apoderado</strong> - Correo del apoderado (requerido)</li>
                   <li><strong>foto_url</strong> - URL de la foto del estudiante (opcional)</li>
@@ -291,81 +280,80 @@ Carlos López,padre3@email.com,,Historia 6A`;
 
           {/* Paso 2: Vista previa */}
           {step === 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div>
+              <div>
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900">Vista Previa de Datos</h4>
-                  <p className="text-sm text-gray-500">
+                  <h4>Vista Previa de Datos</h4>
+                  <p>
                     Revisa los datos antes de importar. Se procesarán {previewData.filter(s => s.isValid).length} de {previewData.length} estudiantes.
                   </p>
                 </div>
                 <button
                   onClick={resetImport}
                   disabled={isLoading}
-                  className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cambiar archivo
                 </button>
               </div>
 
               {/* Estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-blue-600">{previewData.length}</div>
-                  <div className="text-sm text-blue-800">Total estudiantes</div>
+              <div>
+                <div>
+                  <div>{previewData.length}</div>
+                  <div>Total estudiantes</div>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-green-600">
+                <div>
+                  <div>
                     {previewData.filter(s => s.isValid).length}
                   </div>
-                  <div className="text-sm text-green-800">Válidos</div>
+                  <div>Válidos</div>
                 </div>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-red-600">
+                <div>
+                  <div>
                     {previewData.filter(s => !s.isValid).length}
                   </div>
-                  <div className="text-sm text-red-800">Con errores</div>
+                  <div>Con errores</div>
                 </div>
               </div>
 
               {/* Tabla de vista previa */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto max-h-96">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+              <div>
+                <div>
+                  <table>
+                    <thead>
                       <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fila</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email Apoderado</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Curso</th>
+                        <th>Estado</th>
+                        <th>Fila</th>
+                        <th>Nombre</th>
+                        <th>Email Apoderado</th>
+                        <th>Curso</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                       {previewData.map((student, index) => (
-                        <tr key={index} className={student.isValid ? '' : 'bg-red-50'}>
-                          <td className="px-3 py-2 whitespace-nowrap">
+                        <tr key={index}>
+                          <td>
                             {student.isValid ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <span>
                                 ✓ Válido
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              <span>
                                 ✗ Error
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <td>
                             {student.rowIndex}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {student.name || <span className="text-red-500">Faltante</span>}
+                          <td>
+                            {student.name || <span>Faltante</span>}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {student.parentEmail || <span className="text-red-500">Faltante</span>}
+                          <td>
+                            {student.parentEmail || <span>Faltante</span>}
                           </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {student.courseName || <span className="text-gray-400">No especificado</span>}
+                          <td>
+                            {student.courseName || <span>No especificado</span>}
                           </td>
                         </tr>
                       ))}
@@ -378,37 +366,34 @@ Carlos López,padre3@email.com,,Historia 6A`;
 
           {/* Paso 3: Resultados */}
           {step === 3 && importResults && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <h4 className="mt-2 text-lg font-medium text-gray-900">Importación Completada</h4>
+            <div>
+              <div>
+                <h4>Importación Completada</h4>
               </div>
 
               {/* Resultados */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="text-3xl font-bold text-blue-600">{importResults.total}</div>
-                  <div className="text-sm text-blue-800">Total procesados</div>
+              <div>
+                <div>
+                  <div>{importResults.total}</div>
+                  <div>Total procesados</div>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="text-3xl font-bold text-green-600">{importResults.success}</div>
-                  <div className="text-sm text-green-800">Importados exitosamente</div>
+                <div>
+                  <div>{importResults.success}</div>
+                  <div>Importados exitosamente</div>
                 </div>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="text-3xl font-bold text-red-600">{importResults.errors.length}</div>
-                  <div className="text-sm text-red-800">Con errores</div>
+                <div>
+                  <div>{importResults.errors.length}</div>
+                  <div>Con errores</div>
                 </div>
               </div>
 
               {/* Errores */}
               {importResults.errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h5 className="text-sm font-medium text-red-800 mb-3">Errores encontrados:</h5>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                <div>
+                  <h5>Errores encontrados:</h5>
+                  <div>
                     {importResults.errors.map((error, index) => (
-                      <div key={index} className="text-sm text-red-700">
+                      <div key={index}>
                         <strong>Fila {error.row}</strong>
                         {error.name && <span> - {error.name}</span>}: {error.error}
                       </div>
@@ -417,16 +402,14 @@ Carlos López,padre3@email.com,,Historia 6A`;
                 </div>
               )}
 
-              <div className="text-center">
+              <div>
                 <button
                   onClick={resetImport}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 mr-3"
                 >
                   Importar Más Estudiantes
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
                   Cerrar
                 </button>
@@ -436,7 +419,7 @@ Carlos López,padre3@email.com,,Historia 6A`;
 
           {/* Error message */}
           {error && (
-            <div className="mt-4 p-3 text-red-500 text-center bg-red-50 border border-red-200 rounded-md">
+            <div>
               {error}
             </div>
           )}
@@ -444,18 +427,16 @@ Carlos López,padre3@email.com,,Historia 6A`;
 
         {/* Footer */}
         {step === 2 && (
-          <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+          <div>
             <button
               onClick={resetImport}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               onClick={handleImport}
               disabled={isLoading || previewData.filter(s => s.isValid).length === 0}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
               {isLoading ? 'Importando...' : `Importar ${previewData.filter(s => s.isValid).length} Estudiantes`}
             </button>

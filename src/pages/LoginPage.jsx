@@ -118,13 +118,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-md">
+    <div>
+      <div>
         <div>
-          <h2 className="text-3xl font-bold text-center text-gray-900">
+          <h2>
             {isRegistering ? 'Registro de Cuenta' : 'Iniciar Sesión'}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p>
             {isRegistering 
               ? 'Crea tu cuenta para acceder al sistema' 
               : 'Ingresa a tu cuenta'
@@ -132,17 +132,15 @@ export function LoginPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           {error && (
-            <div className="p-3 text-red-500 text-center bg-red-50 border border-red-200 rounded-md">
-              {error}
-            </div>
+            <div>{error}</div>
           )}
 
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div>
             {isRegistering && (
               <div>
-                <label htmlFor="name" className="sr-only">
+                <label htmlFor="name">
                   Nombre Completo
                 </label>
                 <input
@@ -151,16 +149,14 @@ export function LoginPage() {
                   type="text"
                   autoComplete="name"
                   required={isRegistering}
-                  className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Nombre Completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
             )}
-            
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label htmlFor="email-address">
                 Correo Electrónico
               </label>
               <input
@@ -169,17 +165,13 @@ export function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className={`relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                  isRegistering ? '' : 'rounded-t-md'
-                }`}
                 placeholder="Correo Electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password">
                 Contraseña
               </label>
               <input
@@ -188,7 +180,6 @@ export function LoginPage() {
                 type="password"
                 autoComplete={isRegistering ? "new-password" : "current-password"}
                 required
-                className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -198,11 +189,10 @@ export function LoginPage() {
 
           {/* Enlace de recuperación de contraseña */}
           {!isRegistering && (
-            <div className="flex items-center justify-end">
+            <div>
               <button
                 type="button"
                 onClick={() => setShowPasswordReset(true)}
-                className="text-sm text-indigo-600 hover:text-indigo-500"
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -213,63 +203,26 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
                   {isRegistering ? 'Registrando...' : 'Iniciando sesión...'}
                 </>
               ) : (
                 <>
                   {isRegistering ? 'Registrarse' : 'Ingresar'}
-                  {!isLoading && (
-                    <svg
-                      className="w-4 h-4 ml-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  )}
                 </>
               )}
             </button>
           </div>
         </form>
 
-        <div className="flex items-center justify-center">
+        <div>
           <button
             onClick={() => {
               setIsRegistering(!isRegistering);
               clearForm();
             }}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
           >
             {isRegistering 
               ? '¿Ya tienes una cuenta? Inicia Sesión' 
@@ -279,8 +232,8 @@ export function LoginPage() {
         </div>
 
         {/* Información adicional */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
+        <div>
+          <p>
             {isRegistering 
               ? 'Al registrarte, recibirás un correo de verificación.'
               : 'Si tienes problemas para acceder, contacta al administrador.'
