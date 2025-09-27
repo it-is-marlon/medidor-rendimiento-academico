@@ -222,69 +222,51 @@ export function AdministradorDashboard({ user, userProfile }) {
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div>
       {/* Encabezado y botón de cierre de sesión */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-4xl font-extrabold text-gray-900">
-          Panel de Administrador
-        </h1>
-        <button
-          onClick={authService.signOutUser}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors duration-300"
-        >
+      <div>
+        <h1>Panel de Administrador</h1>
+        <button onClick={authService.signOutUser}>
           Cerrar Sesión
         </button>
       </div>
 
-      <p className="text-lg text-gray-600 mb-8">
-        ID del administrador: <span className="font-mono text-sm bg-gray-200 rounded-md px-2 py-1">{user?.uid}</span>
+      <p>
+        ID del administrador: <span>{user?.uid}</span>
       </p>
 
       {/* Navegación de pestañas */}
-      <div className="flex space-x-4 border-b border-gray-200 mb-6">
-        <button
-          onClick={() => setActiveTab('usuarios')}
-          className={`py-2 px-4 font-medium text-lg rounded-t-lg transition-colors duration-200 ${activeTab === 'usuarios' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
-        >
+      <div>
+        <button onClick={() => setActiveTab('usuarios')}>
           Gestión de Usuarios
         </button>
-        <button
-          onClick={() => setActiveTab('cursos')}
-          className={`py-2 px-4 font-medium text-lg rounded-t-lg transition-colors duration-200 ${activeTab === 'cursos' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
-        >
+        <button onClick={() => setActiveTab('cursos')}>
           Gestión de Cursos
         </button>
-        <button
-          onClick={() => setActiveTab('alumnos')}
-          className={`py-2 px-4 font-medium text-lg rounded-t-lg transition-colors duration-200 ${activeTab === 'alumnos' ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
-        >
+        <button onClick={() => setActiveTab('alumnos')}>
           Gestión de Alumnos
         </button>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <svg className="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+        <div>
+          Cargando datos...
         </div>
       ) : (
         <>
           {/* Contenido de la pestaña de Usuarios */}
           {activeTab === 'usuarios' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <div>
+              <h2>
                 {isCreatingUser ? 'Crear Nuevo Usuario' : isEditingUser ? 'Editar Usuario' : 'Lista de Usuarios'}
               </h2>
               {isCreatingUser || isEditingUser ? (
-                <form onSubmit={isCreatingUser ? handleCreateUser : handleUpdateUser} className="mb-6 space-y-4">
+                <form onSubmit={isCreatingUser ? handleCreateUser : handleUpdateUser}>
                   <input
                     type="text"
                     placeholder="Nombre"
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   />
                   {!isEditingUser && (
                     <>
@@ -293,31 +275,25 @@ export function AdministradorDashboard({ user, userProfile }) {
                         placeholder="Correo Electrónico"
                         value={newUserEmail}
                         onChange={(e) => setNewUserEmail(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-md"
                       />
                       <input
                         type="password"
                         placeholder="Contraseña"
                         value={newUserPassword}
                         onChange={(e) => setNewUserPassword(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-md"
                       />
                     </>
                   )}
                   <select
                     value={newUserRole}
                     onChange={(e) => setNewUserRole(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   >
                     <option value="docente">Docente</option>
                     <option value="apoderado">Apoderado</option>
                     <option value="administrador">Administrador</option>
                   </select>
-                  <div className="flex space-x-4">
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-                    >
+                  <div>
+                    <button type="submit">
                       {isCreatingUser ? 'Crear Usuario' : 'Guardar Cambios'}
                     </button>
                     <button
@@ -327,7 +303,6 @@ export function AdministradorDashboard({ user, userProfile }) {
                         setIsEditingUser(false);
                         setEditingUser(null);
                       }}
-                      className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-300"
                     >
                       Cancelar
                     </button>
@@ -335,41 +310,32 @@ export function AdministradorDashboard({ user, userProfile }) {
                 </form>
               ) : (
                 <>
-                  <button
-                    onClick={() => setIsCreatingUser(true)}
-                    className="px-4 py-2 mb-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
-                  >
+                  <button onClick={() => setIsCreatingUser(true)}>
                     Crear Nuevo Usuario
                   </button>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                  <div>
+                    <table>
+                      <thead>
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID de Usuario</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                          <th>Nombre</th>
+                          <th>Email</th>
+                          <th>Rol</th>
+                          <th>ID de Usuario</th>
+                          <th>Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody>
                         {users.map((user) => (
                           <tr key={user.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
-                            <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">{user.userId}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleEditUser(user)}
-                                className="text-indigo-600 hover:text-indigo-900 mr-4"
-                              >
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td>{user.role}</td>
+                            <td>{user.userId}</td>
+                            <td>
+                              <button onClick={() => handleEditUser(user)}>
                                 Editar
                               </button>
-                              <button
-                                onClick={() => handleDeleteUser(user.userId)}
-                                className="text-red-600 hover:text-red-900"
-                              >
+                              <button onClick={() => handleDeleteUser(user.userId)}>
                                 Eliminar
                               </button>
                             </td>
@@ -385,101 +351,81 @@ export function AdministradorDashboard({ user, userProfile }) {
 
           {/* Contenido de la pestaña de Cursos */}
           {activeTab === 'cursos' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <div>
+              <h2>
                 {isEditingCourse ? 'Editar Curso' : 'Gestión de Cursos'}
               </h2>
               {isEditingCourse ? (
-                <form onSubmit={handleUpdateCourse} className="mb-6 space-y-4">
+                <form onSubmit={handleUpdateCourse}>
                   <input
                     type="text"
                     placeholder="Nombre del curso"
                     value={newCourseName}
                     onChange={(e) => setNewCourseName(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   />
                   <select
                     value={newCourseTeacher}
                     onChange={(e) => setNewCourseTeacher(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   >
                     <option value="" disabled>Selecciona un docente</option>
                     {teachers.map((teacher) => (
                       <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
                     ))}
                   </select>
-                  <div className="flex space-x-4">
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-                    >
+                  <div>
+                    <button type="submit">
                       Guardar Cambios
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingCourse(false)}
-                      className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-300"
-                    >
+                    <button type="button" onClick={() => setIsEditingCourse(false)}>
                       Cancelar
                     </button>
                   </div>
                 </form>
               ) : (
                 <>
-                  <form onSubmit={handleCreateCourse} className="mb-6 space-y-4">
-                    <h3 className="text-xl font-semibold text-gray-700">Crear Nuevo Curso</h3>
+                  <form onSubmit={handleCreateCourse}>
+                    <h3>Crear Nuevo Curso</h3>
                     <input
                       type="text"
                       placeholder="Nombre del curso"
                       value={newCourseName}
                       onChange={(e) => setNewCourseName(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
                     />
                     <select
                       value={newCourseTeacher}
                       onChange={(e) => setNewCourseTeacher(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-md"
                     >
                       <option value="" disabled>Selecciona un docente</option>
                       {teachers.map((teacher) => (
                         <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
                       ))}
                     </select>
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-                    >
+                    <button type="submit">
                       Crear Curso
                     </button>
                   </form>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-4">Lista de Cursos</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                  <h3>Lista de Cursos</h3>
+                  <div>
+                    <table>
+                      <thead>
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre del Curso</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Docente Asignado</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID del Curso</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                          <th>Nombre del Curso</th>
+                          <th>Docente Asignado</th>
+                          <th>ID del Curso</th>
+                          <th>Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody>
                         {courses.map((course) => (
                           <tr key={course.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">{course.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{getTeacherName(course.teacherId)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">{course.id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleEditCourse(course)}
-                                className="text-indigo-600 hover:text-indigo-900 mr-4"
-                              >
+                            <td>{course.name}</td>
+                            <td>{getTeacherName(course.teacherId)}</td>
+                            <td>{course.id}</td>
+                            <td>
+                              <button onClick={() => handleEditCourse(course)}>
                                 Editar
                               </button>
-                              <button
-                                onClick={() => handleDeleteCourse(course.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
+                              <button onClick={() => handleDeleteCourse(course.id)}>
                                 Eliminar
                               </button>
                             </td>
@@ -495,38 +441,29 @@ export function AdministradorDashboard({ user, userProfile }) {
 
           {/* Contenido de la pestaña de Alumnos */}
           {activeTab === 'alumnos' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <div>
+              <h2>
                 {isEditingStudent ? 'Editar Alumno' : 'Gestión de Alumnos'}
               </h2>
               {isEditingStudent ? (
-                <form onSubmit={handleUpdateStudent} className="mb-6 space-y-4">
+                <form onSubmit={handleUpdateStudent}>
                   <input
                     type="text"
                     placeholder="Nombre del alumno"
                     value={newStudentName}
                     onChange={(e) => setNewStudentName(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   />
                   <input
                     type="email"
                     placeholder="Correo del Apoderado"
                     value={newStudentParentEmail}
                     onChange={(e) => setNewStudentParentEmail(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
                   />
-                  <div className="flex space-x-4">
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-                    >
+                  <div>
+                    <button type="submit">
                       Guardar Cambios
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingStudent(false)}
-                      className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-300"
-                    >
+                    <button type="button" onClick={() => setIsEditingStudent(false)}>
                       Cancelar
                     </button>
                   </div>
@@ -534,64 +471,41 @@ export function AdministradorDashboard({ user, userProfile }) {
               ) : (
                 <>
                   {/* Botones de acción */}
-                  <div className="flex flex-wrap gap-3 mb-6">
-                    <button
-                      onClick={handleCreateStudent}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300 flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
+                  <div>
+                    <button onClick={handleCreateStudent}>
                       Registrar Estudiante
                     </button>
-                    <button
-                      onClick={handleImportStudents}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
+                    <button onClick={handleImportStudents}>
                       Importar desde Archivo
                     </button>
                   </div>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                  <div>
+                    <table>
+                      <thead>
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email del Apoderado</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cursos</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID de Alumno</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                          <th>Foto</th>
+                          <th>Nombre</th>
+                          <th>Email del Apoderado</th>
+                          <th>Cursos</th>
+                          <th>ID de Alumno</th>
+                          <th>Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody>
                         {students.map((student) => (
                           <tr key={student.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <img className="h-10 w-10 rounded-full object-cover" src={student.photoUrl} alt={student.name} />
+                            <td></td>
+                            <td>{student.name}</td>
+                            <td>{student.parentEmail}</td>
+                            <td>
+                              {student.courseIds?.length || 0} curso(s)
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">{student.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{student.parentEmail}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {student.courseIds?.length || 0} curso(s)
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap font-mono text-xs">{student.id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleEditStudent(student)}
-                                className="text-indigo-600 hover:text-indigo-900 mr-4"
-                              >
+                            <td>{student.id}</td>
+                            <td>
+                              <button onClick={() => handleEditStudent(student)}>
                                 Editar
                               </button>
-                              <button
-                                onClick={() => handleDeleteStudent(student.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
+                              <button onClick={() => handleDeleteStudent(student.id)}>
                                 Eliminar
                               </button>
                             </td>
